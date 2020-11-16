@@ -205,7 +205,7 @@ const actionTypeKeyValue = actionTypeOptions.reduce((acc, cur) => {
 }, {})
 
 export default {
-  name: 'ComplexTable',
+  name: 'User',
   components: { Pagination },
   directives: { waves },
   filters: {

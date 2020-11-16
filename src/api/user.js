@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function login(data) {
   return request({
-    url: '/api/v1/login',
+    url: '/auth',
     method: 'post',
     data
   })
@@ -10,14 +10,14 @@ export function login(data) {
 
 export function logout() {
   return request({
-    url: '/api/v1/logout',
+    url: '/api/logout',
     method: 'post'
   })
 }
 
 export function getInfo(token) {
   return request({
-    url: '/api/v1/user/info',
+    url: '/api/users/info',
     method: 'get'
     // params: { token }
   })
@@ -25,14 +25,14 @@ export function getInfo(token) {
 
 export function getList() {
   return request({
-    url: '/api/v1/users',
+    url: '/api/users',
     method: 'get'
   })
 }
 
 export function addUser(data) {
   return request({
-    url: '/api/v1/users',
+    url: '/api/users',
     method: 'post',
     data
   })
@@ -40,7 +40,7 @@ export function addUser(data) {
 
 export function updateUser(id, data) {
   return request({
-    url: '/api/v1/users/' + id,
+    url: '/api/users/' + id,
     method: 'put',
     data
   })
@@ -48,14 +48,14 @@ export function updateUser(id, data) {
 
 export function deleteUser(id) {
   return request({
-    url: '/api/v1/users/' + id,
+    url: '/api/users/' + id,
     method: 'delete'
   })
 }
 
 export function batchUser(data) {
   return request({
-    url: '/api/v1/users/batch',
+    url: '/api/users/batch',
     method: 'post',
     data
   })
