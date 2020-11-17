@@ -6,6 +6,12 @@ Vue.use(Router)
 /* Layout */
 import Layout from '@/layout'
 
+/* Router Modules */
+// import componentsRouter from './modules/components'
+// import chartsRouter from './modules/charts'
+// import tableRouter from './modules/table'
+// import nestedRouter from './modules/nested'
+
 /**
  * Note: sub-menu only appear when route children.length >= 1
  * Detail see: https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
@@ -20,6 +26,8 @@ import Layout from '@/layout'
     roles: ['admin','editor']    control the page roles (you can set multiple roles)
     title: 'title'               the name show in sidebar and breadcrumb (recommend set)
     icon: 'svg-name'/'el-icon-x' the icon show in the sidebar
+    noCache: true                if set true, the page will no be cached(default is false)
+    affix: true                  if set true, the tag will affix in the tags-view
     breadcrumb: false            if set false, the item will hidden in breadcrumb(default is true)
     activeMenu: '/example/list'  if set path, the sidebar will highlight the path you set
   }
@@ -32,21 +40,41 @@ import Layout from '@/layout'
  */
 export const constantRoutes = [
   {
+    path: '/redirect',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '/redirect/:path(.*)',
+        component: () => import('@/views/redirect/index')
+      }
+    ]
+  },
+  {
     path: '/login',
     component: () => import('@/views/login/index'),
     hidden: true
   },
-
+  {
+    path: '/auth-redirect',
+    component: () => import('@/views/login/auth-redirect'),
+    hidden: true
+  },
   {
     path: '/404',
-    component: () => import('@/views/404'),
+    component: () => import('@/views/error-page/404'),
+    hidden: true
+  },
+  {
+    path: '/401',
+    component: () => import('@/views/error-page/401'),
     hidden: true
   },
 
   {
     path: '/',
     component: Layout,
-    redirect: '/domain/domain',
+    redirect: '/domain',
     name: 'List',
     meta: { title: 'Domain', icon: 'el-icon-s-help' },
     children: [
@@ -73,7 +101,57 @@ export const constantRoutes = [
         meta: { title: 'User', icon: 'user' }
       }
     ]
-  },
+  }
+]
+
+/**
+ * asyncRoutes
+ * the routes that need to be dynamically loaded based on user roles
+ */
+export const asyncRoutes = [
+  // {
+  //   path: '/permission',
+  //   component: Layout,
+  //   redirect: '/permission/page',
+  //   alwaysShow: true, // will always show the root menu
+  //   name: 'Permission',
+  //   meta: {
+  //     title: 'Permission',
+  //     icon: 'lock',
+  //     roles: ['administrator'] // you can set roles in root nav
+  //   },
+  //   children: [
+  //     {
+  //       path: 'page',
+  //       component: () => import('@/views/permission/page'),
+  //       name: 'PagePermission',
+  //       meta: {
+  //         title: 'Page Permission',
+  //         roles: ['admin'] // or you can only set roles in sub nav
+  //       }
+  //     },
+  //     {
+  //       path: 'directive',
+  //       component: () => import('@/views/permission/directive'),
+  //       name: 'DirectivePermission',
+  //       meta: {
+  //         title: 'Directive Permission'
+  //         // if do not set roles, means: this page does not require permission
+  //       }
+  //     },
+  //     {
+  //       path: 'role',
+  //       component: () => import('@/views/permission/role'),
+  //       name: 'RolePermission',
+  //       meta: {
+  //         title: 'Role Permission',
+  //         roles: ['admin']
+  //       }
+  //     }
+  //   ]
+  // },
+
+  /** when your routing map is too long, you can split it into small modules **/
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }

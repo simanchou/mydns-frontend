@@ -53,7 +53,7 @@
       </el-table-column>
       <el-table-column label="Role" align="center">
         <template slot-scope="{row}">
-          {{ row.role | roleTypeFilter }}
+          {{ row.roles[0] | roleTypeFilter }}
         </template>
       </el-table-column>
       <el-table-column class-name="status-col" label="Status" align="center">
@@ -118,16 +118,6 @@
           Confirm
         </el-button>
       </div>
-    </el-dialog>
-
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">Confirm</el-button>
-      </span>
     </el-dialog>
 
     <el-dialog :visible.sync="dialogBatchVisible" title="批量操作" width="25%">
@@ -398,7 +388,7 @@ export default {
             }
 
             listTemp.map((x) => {
-              if (x.role.indexOf(this.listQuery.role) >= 0) {
+              if (x.roles[0].indexOf(this.listQuery.role) >= 0) {
                 listFiltered.push(x)
               }
             })
@@ -596,26 +586,6 @@ export default {
         })
       })
     },
-    // handleFetchPv(pv) {
-    //   fetchPv(pv).then(response => {
-    //     this.pvData = response.data.pvData
-    //     this.dialogPvVisible = true
-    //   })
-    // },
-    // handleDownload() {
-    //   this.downloadLoading = true
-    //   import('@/vendor/Export2Excel').then(excel => {
-    //     const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
-    //     const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
-    //     const data = this.formatJson(filterVal)
-    //     excel.export_json_to_excel({
-    //       header: tHeader,
-    //       data,
-    //       filename: 'table-list'
-    //     })
-    //     this.downloadLoading = false
-    //   })
-    // },
     formatJson(filterVal) {
       return this.list.map(v => filterVal.map(j => {
         if (j === 'timestamp') {
