@@ -2,8 +2,8 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input v-model="listQuery.zone" placeholder="Domain" style="width: 200px;" class="filter-item" @input="handleFilter('zone')" />
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter('zone')">
-        Search
+      <el-button v-waves class="filter-item" type="primary" icon="el-icon-refresh" @click="handleRefresh">
+        Refresh
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
         Add
@@ -33,7 +33,7 @@
       </el-table-column>
       <el-table-column label="Domain" align="center">
         <template slot-scope="{row}">
-          <span class="link-type" @click="handleUpdate(row)">{{ row.zone }}</span>
+          <span class="link-type" @click="handleAddRouter(row.zone)">{{ row.zone }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Owner" align="center">
@@ -233,10 +233,11 @@ export default {
         this.total = response.data.length
 
         // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
+        // setTimeout(() => {
+        //   this.listLoading = false
+        // }, 1.5 * 1000)
       })
+      this.listLoading = false
     },
     page() {
       this.currentPage = this.listQuery.page
@@ -251,6 +252,12 @@ export default {
     handleBatchOperation() {
       this.dialogBatchVisible = true
       this.batchObj.items = this.selected
+    },
+    handleRefresh() {
+      this.listFilteredVersion = {}
+      this.listFilteredVersionNumber = 0
+      this.listQuery.zone = ''
+      this.list = this.listOrgin
     },
     handleFilter(item) {
       var listFiltered = []
@@ -377,6 +384,9 @@ export default {
     getSortClass: function(key) {
       const sort = this.listQuery.sort
       return sort === `+${key}` ? 'ascending' : 'descending'
+    },
+    handleAddRouter(p) {
+      this.$router.push({ name: 'Record', title: '', params: { recordid: p }})
     }
   }
 }

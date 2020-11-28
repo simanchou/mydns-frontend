@@ -82,23 +82,44 @@ export const constantRoutes = [
         path: 'domain',
         name: 'Table',
         component: () => import('@/views/domain/index'),
-        meta: { title: 'Domain', icon: 'example' }
+        meta: { title: 'Domain', icon: 'example', affix: true }
+      }
+      // {
+      //   path: 'record/:recordid',
+      //   name: 'Record',
+      //   hidden: true,
+      //   component: () => import('@/views/record/index'),
+      //   meta: { key: 'path', title: 'Record', icon: 'user' }
+      // }
+    ]
+  },
+
+  {
+    path: '/record',
+    component: Layout,
+    redirect: '/record/:recordid',
+    hidden: true,
+    children: [
+      {
+        path: '/:recordid',
+        component: () => import('@/views/record/index'),
+        name: 'Record',
+        meta: { key: 'path', title: 'Record', icon: 'user', noCache: true }
       }
     ]
   },
 
   {
-    path: '/system',
+    path: '/profile',
     component: Layout,
-    redirect: '/system/user',
-    name: 'System',
-    meta: { title: 'System', icon: 'el-icon-s-help' },
+    redirect: '/profile/index',
+    hidden: true,
     children: [
       {
-        path: 'user',
-        name: 'User',
-        component: () => import('@/views/user/index'),
-        meta: { title: 'User', icon: 'user' }
+        path: 'index',
+        component: () => import('@/views/profile/index'),
+        name: 'Profile',
+        meta: { title: 'Profile', icon: 'user', noCache: true }
       }
     ]
   }
@@ -109,47 +130,21 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
-  // {
-  //   path: '/permission',
-  //   component: Layout,
-  //   redirect: '/permission/page',
-  //   alwaysShow: true, // will always show the root menu
-  //   name: 'Permission',
-  //   meta: {
-  //     title: 'Permission',
-  //     icon: 'lock',
-  //     roles: ['administrator'] // you can set roles in root nav
-  //   },
-  //   children: [
-  //     {
-  //       path: 'page',
-  //       component: () => import('@/views/permission/page'),
-  //       name: 'PagePermission',
-  //       meta: {
-  //         title: 'Page Permission',
-  //         roles: ['admin'] // or you can only set roles in sub nav
-  //       }
-  //     },
-  //     {
-  //       path: 'directive',
-  //       component: () => import('@/views/permission/directive'),
-  //       name: 'DirectivePermission',
-  //       meta: {
-  //         title: 'Directive Permission'
-  //         // if do not set roles, means: this page does not require permission
-  //       }
-  //     },
-  //     {
-  //       path: 'role',
-  //       component: () => import('@/views/permission/role'),
-  //       name: 'RolePermission',
-  //       meta: {
-  //         title: 'Role Permission',
-  //         roles: ['admin']
-  //       }
-  //     }
-  //   ]
-  // },
+  {
+    path: '/system',
+    component: Layout,
+    redirect: '/system/user',
+    name: 'System',
+    meta: { title: 'System', icon: 'el-icon-s-help', roles: ['admin'] },
+    children: [
+      {
+        path: 'user',
+        name: 'User',
+        component: () => import('@/views/user/index'),
+        meta: { title: 'User', icon: 'user', roles: ['admin'] }
+      }
+    ]
+  },
 
   /** when your routing map is too long, you can split it into small modules **/
 

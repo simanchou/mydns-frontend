@@ -63,6 +63,14 @@ const mutations = {
         break
       }
     }
+  },
+  UPDATE_VIEW_TITLE: (state, view) => {
+    const v = state.visitedViews.findIndex(el => {
+      return el.path === view.path
+    })
+    if (state.visitedViews[v]) {
+      state.visitedViews[v].title = view.meta.title
+    }
   }
 }
 
@@ -149,6 +157,10 @@ const actions = {
 
   updateVisitedView({ commit }, view) {
     commit('UPDATE_VISITED_VIEW', view)
+  },
+
+  updateViewTitle({ commit }, view) {
+    commit('UPDATE_VIEW_TITLE', view)
   }
 }
 

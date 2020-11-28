@@ -1,15 +1,8 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.username" placeholder="Username" style="width: 200px;" class="filter-item" @change="handleFilter('username')" />
-      <el-input v-model="listQuery.nickname" placeholder="Nickname" style="width: 200px;" class="filter-item" @change="handleFilter('nickname')" />
-      <el-select v-model="listQuery.role" placeholder="Role" clearable style="width: 90px" class="filter-item" @change="handleFilter('role')">
-        <el-option v-for="item in roleTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.active" placeholder="Status" clearable class="filter-item" style="width: 130px" @change="handleFilter('status')">
-        <el-option v-for="item in activeTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-      </el-select>
-
+      <el-input v-model="listQuery.name" placeholder="Name" style="width: 200px;" class="filter-item" @input="handleFilter('name')" />
+      <el-input v-model="listQuery.value" placeholder="Value" style="width: 200px;" class="filter-item" @input="handleFilter('value')" />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-refresh" @click="handleRefresh">
         Refresh
       </el-button>
@@ -35,48 +28,43 @@
       @sort-change="sortChange"
       @selection-change="handleSelectionChange"
     >
-      <el-table-column type="selection" width="55" reserve-selection="" />
-      <el-table-column align="center" label="ID" width="100">
+      <el-table-column type="selection" width="50" reserve-selection="" :selectable="handleSelectAble" />
+      <!--<el-table-column align="center" label="ID" width="50">
         <template slot-scope="scope">
           {{ scope.$index | orderId }}
         </template>
-      </el-table-column>
-      <el-table-column label="Username" align="center">
+      </el-table-column>-->
+      <el-table-column label="Type" align="center" width="100">
         <template slot-scope="{row}">
-          <span class="link-type" @click="handleUpdate(row)">{{ row.username }}</span>
+          <span>{{ row.type }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Nickname" align="center">
+      <el-table-column label="Name" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.nickname }}</span>
+          <span>{{ row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Role" align="center">
+      <el-table-column label="Value" align="center">
         <template slot-scope="{row}">
-          {{ row.roles[0] | roleTypeFilter }}
+          <span>{{ row.value }}</span>
         </template>
       </el-table-column>
-      <el-table-column class-name="status-col" label="Status" align="center">
+      <el-table-column label="Priority" align="center" width="80">
         <template slot-scope="{row}">
-          <el-tag :type="row.active | statusFilter">{{ row.active?'启用':'禁用' }}</el-tag>
+          <span>{{ row.type === 'MX'?row.priority:'-' }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" prop="created_at" label="Create_time">
+      <el-table-column label="TTL" align="center" width="80">
         <template slot-scope="{row}">
-          <span>{{ row.create_at | formatDate }}</span>
+          <span>{{ row.ttl }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" prop="update_at" label="Update_time">
+      <el-table-column label="Actions" align="center" class-name="small-padding fixed-width" width="150">
         <template slot-scope="{row}">
-          <span>{{ row.update_at | formatDate }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Actions" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="{row,$index}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">
+          <el-button v-if="row.type!='NS'" type="primary" size="mini" @click="handleUpdate(row)">
             Edit
           </el-button>
-          <el-button v-if="row.username!='admin'" size="mini" type="danger" @click="handleDelete(row,$index)">
+          <el-button v-if="row.type!='NS'" size="mini" type="danger" @click="handleDelete(row)">
             Delete
           </el-button>
         </template>
@@ -84,69 +72,35 @@
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="page" />
-    <!--
-        原生分页教程https://www.cnblogs.com/dreamsqin/p/9341230.html
-        <el-pagination background layout="total, sizes, prev, pager, next, jumper" :total="total" @current-change="current_change" />-->
 
-    <el-dialog title="Edit" :visible.sync="dialogEditItemVisible">
-      <el-form ref="itemDataForm" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="Username" prop="username">
-          <el-input v-model="temp.username" :disabled="dialogItemInput" />
-        </el-form-item>
-        <el-form-item label="Nickname" prop="nickname">
-          <el-input v-model="temp.nickname" />
-        </el-form-item>
-        <el-form-item v-if="temp.username!='admin'" label="Role" prop="role">
-          <el-select v-model="temp.role" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in roleTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-          </el-select>
-        </el-form-item>
-        <el-form-item v-if="temp.username!='admin'" label="Active" prop="active">
-          <el-select v-model="temp.active" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in activeTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Password" prop="password">
-          <el-input v-model="temp.password" placeholder="won't change if leave blank" show-password />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogEditItemVisible = false">
-          Cancel
-        </el-button>
-        <el-button type="primary" @click="updateData()">
-          Confirm
-        </el-button>
-      </div>
-    </el-dialog>
-
-    <el-dialog title="Add" :visible.sync="dialogAddItemVisible">
+    <el-dialog :title="dialogItemTextMap[dialogItemStatus]" :visible.sync="dialogItemVisible">
       <el-form ref="itemDataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="Username" prop="username">
-          <el-input v-model="temp.username" :disabled="dialogItemInput" />
+        <el-form-item label="Domain" prop="domain">
+          <el-input v-model="temp.domain" :disabled="true" />
         </el-form-item>
-        <el-form-item label="Nickname" prop="nickname">
-          <el-input v-model="temp.nickname" />
-        </el-form-item>
-        <el-form-item label="Role" prop="role">
-          <el-select v-model="temp.role" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in roleTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
+        <el-form-item label="Type" prop="type">
+          <el-select v-model="temp.type" class="filter-item" placeholder="Please select" @change="handleTypeSelect">
+            <el-option v-for="item in recordTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Active" prop="active">
-          <el-select v-model="temp.active" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in activeTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-          </el-select>
+        <el-form-item label="Name" prop="name">
+          <el-input v-model="temp.name" />
         </el-form-item>
-        <el-form-item label="Password" prop="password">
-          <el-input v-model="temp.password" show-password />
+        <el-form-item label="Value" prop="value">
+          <el-input v-model="temp.value" />
+        </el-form-item>
+        <el-form-item v-if="isMXType" label="Priority" prop="priority">
+          <el-input v-model="temp.priority" />
+        </el-form-item>
+        <el-form-item label="TTL" prop="ttl">
+          <el-input v-model="temp.ttl" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogAddItemVisible = false">
+        <el-button @click="dialogItemVisible = false">
           Cancel
         </el-button>
-        <el-button type="primary" @click="createData()">
+        <el-button type="primary" @click="dialogItemStatus==='create'?createData():updateData()">
           Confirm
         </el-button>
       </div>
@@ -175,32 +129,22 @@
 
 <script>
 // import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
-import { getList, updateUser, deleteUser, addUser, batchUser } from '@/api/user'
+import { getList, addRecord, deleteRecord, batchRecord, updateRecord } from '@/api/record'
 import { formatRFC3309 } from '@/utils/index'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils/index'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
+import { checkTTLMin } from '@/utils/form-rules'
 
-const calendarTypeOptions = [
-  { key: 'CN', display_name: 'China' },
-  { key: 'US', display_name: 'USA' },
-  { key: 'JP', display_name: 'Japan' },
-  { key: 'EU', display_name: 'Eurozone' }
+const recordTypeOptions = [
+  { key: 'A', display_name: 'A' },
+  { key: 'CNAME', display_name: 'CNAME' },
+  { key: 'TXT', display_name: 'TXT' },
+  { key: 'MX', display_name: 'MX' },
+  { key: 'AAAA', display_name: 'AAAA' }
 ]
 
-// arr to obj, such as { CN : "China", US : "USA" }
-const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
-  acc[cur.key] = cur.display_name
-  return acc
-}, {})
-
-const roleTypeOptions = [
-  { key: 'admin', display_name: '管理员' },
-  { key: 'editor', display_name: '编辑者' },
-  { key: 'viewer', display_name: '观察者' }
-]
-
-const roleTypeKeyValue = roleTypeOptions.reduce((acc, cur) => {
+const recordTypeKeyValue = recordTypeOptions.reduce((acc, cur) => {
   acc[cur.key] = cur.display_name
   return acc
 }, {})
@@ -216,8 +160,8 @@ const activeTypeKeyValue = activeTypeOptions.reduce((acc, cur) => {
 }, {})
 
 const actionTypeOptions = [
-  { key: 'active', display_name: '启用' },
-  { key: 'inactive', display_name: '禁用' },
+  // { key: 'active', display_name: '启用' },
+  // { key: 'inactive', display_name: '禁用' },
   { key: 'delete', display_name: '删除' }
 ]
 
@@ -227,7 +171,7 @@ const actionTypeKeyValue = actionTypeOptions.reduce((acc, cur) => {
 }, {})
 
 export default {
-  name: 'User',
+  name: 'Domain',
   components: { Pagination },
   directives: { waves },
   filters: {
@@ -245,11 +189,8 @@ export default {
       id += 1
       return id
     },
-    typeFilter(type) {
-      return calendarTypeKeyValue[type]
-    },
     roleTypeFilter(type) {
-      return roleTypeKeyValue[type]
+      return recordTypeKeyValue[type]
     },
     activeTypeFilter(type) {
       return activeTypeKeyValue[type]
@@ -260,6 +201,7 @@ export default {
   },
   data() {
     return {
+      domain: this.$route.params.recordid,
       tableKey: 0,
       list: [],
       listOrgin: [],
@@ -272,36 +214,37 @@ export default {
       listQuery: {
         page: 1,
         limit: 10,
-        username: undefined,
-        nickname: undefined,
-        role: undefined,
-        active: undefined,
+        name: undefined,
+        value: undefined,
         sort: '+id'
       },
       dialogItemInput: false,
       selected: [],
       importanceOptions: [1, 2, 3],
-      calendarTypeOptions,
-      roleTypeOptions,
+      recordTypeOptions,
       activeTypeOptions,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
+      addZone: '',
+      isMXType: false,
       temp: {
-        active: '',
-        username: '',
-        nickname: '',
-        password: '',
-        role: ''
+        id: '',
+        domain: '',
+        type: '',
+        name: '',
+        value: '',
+        priority: 0,
+        ttl: 0
       },
       batchObj: {
+        domain: '',
         action: '',
         items: []
       },
       actionTypeOptions,
       dialogBatchVisible: false,
-      dialogEditItemVisible: false,
-      dialogAddItemVisible: false,
+      dialogItemVisible: false,
       dialogItemStatus: '',
       dialogItemTextMap: {
         update: 'Edit',
@@ -310,25 +253,31 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        username: [{ required: true, message: 'username is required', trigger: 'change' }],
-        nickname: [{ required: true, message: 'nickname is required', trigger: 'change' }],
-        role: [{ required: true, message: 'role is required', trigger: 'change' }],
-        active: [{ required: true, message: 'active is required', trigger: 'change' }],
-        password: [{ required: true, message: 'password is required', trigger: 'change' }]
+        type: [{ required: true, message: 'type is required', trigger: 'change' }],
+        name: [{ required: true, message: 'name is required', trigger: 'change' }],
+        value: [{ required: true, message: 'value is required', trigger: 'change' }],
+        ttl: [{ validator: checkTTLMin, trigger: 'change' }]
       },
       downloadLoading: false
     }
   },
   created() {
     this.getList()
+    this.$route.meta.title = this.$route.params.recordid
+    this.$store.dispatch('tagsView/updateViewTitle', this.$route)
   },
   methods: {
     getList() {
       this.listLoading = true
-      getList().then(response => {
-        this.list = response.data
-        this.listOrgin = response.data
-        this.total = response.data.length
+      getList(this.domain).then(response => {
+        this.list = response.data.map((x) => {
+          if (x.value.charAt(x.value.length - 1) === '.') {
+            x.value = x.value.substring(0, x.value.length - 1)
+          }
+          return x
+        })
+        this.listOrgin = this.list
+        this.total = this.list.length
 
         // Just to simulate the time of the request
         // setTimeout(() => {
@@ -344,19 +293,23 @@ export default {
     current_change: function(currentPage) {
       this.currentPage = currentPage
     },
+    handleSelectAble(row) {
+      return row.type !== 'NS'
+    },
     handleSelectionChange(val) {
       this.selected = val
     },
     handleBatchOperation() {
       this.dialogBatchVisible = true
+      this.batchObj.domain = this.domain
       this.batchObj.items = this.selected
     },
     handleFilter(item) {
       var listFiltered = []
       var listTemp = []
       switch (item) {
-        case 'username':
-          if (this.listQuery.username) {
+        case 'name':
+          if (this.listQuery.name) {
             if (Object.keys(this.listFilteredVersion).length > 0) {
               listTemp = this.listFilteredVersion[Object.keys(this.listFilteredVersion).length]
             } else {
@@ -364,7 +317,7 @@ export default {
             }
 
             listTemp.map((x) => {
-              if (x.username.indexOf(this.listQuery.username) >= 0) {
+              if (x.name.indexOf(this.listQuery.name) >= 0) {
                 listFiltered.push(x)
               }
             })
@@ -385,8 +338,8 @@ export default {
             }
           }
           break
-        case 'nickname':
-          if (this.listQuery.nickname) {
+        case 'value':
+          if (this.listQuery.value) {
             if (Object.keys(this.listFilteredVersion).length > 0) {
               listTemp = this.listFilteredVersion[Object.keys(this.listFilteredVersion).length]
             } else {
@@ -394,67 +347,7 @@ export default {
             }
 
             listTemp.map((x) => {
-              if (x.nickname.indexOf(this.listQuery.nickname) >= 0) {
-                listFiltered.push(x)
-              }
-            })
-            this.list = listFiltered
-            this.listFilteredVersionNumber += 1
-            this.listFilteredVersion[this.listFilteredVersionNumber] = listFiltered
-          } else {
-            if (Object.keys(this.listFilteredVersion).length > 1) {
-              this.list = this.listFilteredVersion[Object.keys(this.listFilteredVersion).length - 1]
-              delete this.listFilteredVersion[Object.keys(this.listFilteredVersion).length]
-              this.listFilteredVersionNumber -= 1
-            } else if (Object.keys(this.listFilteredVersion).length === 1) {
-              this.list = this.listOrgin
-              delete this.listFilteredVersion[Object.keys(this.listFilteredVersion).length]
-              this.listFilteredVersionNumber -= 1
-            } else {
-              this.list = this.listOrgin
-            }
-          }
-          break
-        case 'role':
-          if (this.listQuery.role) {
-            if (Object.keys(this.listFilteredVersion).length > 0) {
-              listTemp = this.listFilteredVersion[Object.keys(this.listFilteredVersion).length]
-            } else {
-              listTemp = this.listOrgin
-            }
-
-            listTemp.map((x) => {
-              if (x.roles[0].indexOf(this.listQuery.role) >= 0) {
-                listFiltered.push(x)
-              }
-            })
-            this.list = listFiltered
-            this.listFilteredVersionNumber += 1
-            this.listFilteredVersion[this.listFilteredVersionNumber] = listFiltered
-          } else {
-            if (Object.keys(this.listFilteredVersion).length > 1) {
-              this.list = this.listFilteredVersion[Object.keys(this.listFilteredVersion).length - 1]
-              delete this.listFilteredVersion[Object.keys(this.listFilteredVersion).length]
-              this.listFilteredVersionNumber -= 1
-            } else if (Object.keys(this.listFilteredVersion).length === 1) {
-              this.list = this.listOrgin
-              delete this.listFilteredVersion[Object.keys(this.listFilteredVersion).length]
-              this.listFilteredVersionNumber -= 1
-            } else {
-              this.list = this.listOrgin
-            }
-          }
-          break
-        case 'status':
-          if (String(this.listQuery.active)) {
-            if (Object.keys(this.listFilteredVersion).length > 0) {
-              listTemp = this.listFilteredVersion[Object.keys(this.listFilteredVersion).length]
-            } else {
-              listTemp = this.listOrgin
-            }
-
-            listTemp.map((x) => {
-              if (x.active === this.listQuery.active) {
+              if (x.value.indexOf(this.listQuery.value) >= 0) {
                 listFiltered.push(x)
               }
             })
@@ -482,10 +375,8 @@ export default {
     handleRefresh() {
       this.listFilteredVersion = {}
       this.listFilteredVersionNumber = 0
-      this.listQuery.username = ''
-      this.listQuery.nickname = ''
-      this.listQuery.role = ''
-      this.listQuery.active = ''
+      this.listQuery.value = ''
+      this.listQuery.name = ''
       this.list = this.listOrgin
     },
     getRowKey(row) {
@@ -514,30 +405,36 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        active: '',
-        username: '',
-        nickname: '',
-        password: '',
-        role: '',
-        roles: []
+        domain: this.domain,
+        type: '',
+        name: '',
+        value: '',
+        priority: 10,
+        ttl: 600
+      }
+    },
+    handleTypeSelect() {
+      if (this.temp.type === 'MX') {
+        this.isMXType = true
+      } else {
+        this.isMXType = false
       }
     },
     handleCreate() {
       this.resetTemp()
       this.dialogItemInput = false
       this.dialogItemStatus = 'create'
-      this.dialogAddItemVisible = true
+      this.dialogItemVisible = true
       this.$nextTick(() => {
         this.$refs['itemDataForm'].clearValidate()
       })
     },
     createData() {
-      if (this.temp.role) { this.temp.roles.push(this.temp.role) }
       this.$refs['itemDataForm'].validate((valid) => {
         if (valid) {
-          addUser(this.temp).then(() => {
-            this.list.unshift(this.temp)
-            this.dialogAddItemVisible = false
+          addRecord(this.temp).then(() => {
+            // this.list.unshift(this.temp)
+            this.dialogItemVisible = false
             this.$notify({
               title: 'Success',
               message: 'Created Successfully',
@@ -551,11 +448,15 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.role = this.temp.roles[0]
+      if (this.temp.type === 'MX') {
+        this.isMXType = true
+      } else {
+        this.isMXType = false
+      }
+      this.temp.domain = this.domain
       this.dialogItemInput = true
-      this.temp.password = ''
       this.dialogItemStatus = 'update'
-      this.dialogEditItemVisible = true
+      this.dialogItemVisible = true
       this.$nextTick(() => {
         this.$refs['itemDataForm'].clearValidate()
       })
@@ -564,10 +465,10 @@ export default {
       this.$refs['itemDataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateUser(tempData.id, tempData).then(() => {
+          updateRecord(tempData).then(() => {
             const index = this.list.findIndex(v => v.id === this.temp.id)
             this.list.splice(index, 1, this.temp)
-            this.dialogEditItemVisible = false
+            this.dialogItemVisible = false
             this.$notify({
               title: 'Success',
               message: 'Update Successfully',
@@ -579,33 +480,22 @@ export default {
         }
       })
     },
-    handleDeleteOld(row, index) {
-      this.$notify({
-        title: 'Success',
-        message: 'Delete Successfully',
-        type: 'success',
-        duration: 2000
-      })
-      this.list.splice(index, 1)
-    },
-    handleDelete(row, index) {
-      this.$confirm('此操作将永久删除该条目, 是否继续?', '提示', {
+    handleDelete(row) {
+      this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        deleteUser(row.id).then(() => {
+        deleteRecord(this.domain, row.id).then(() => {
           this.$message({
             type: 'success',
             message: '删除成功!'
           })
-          this.list.splice(index, 1)
-        }).catch(() => {
-          this.$message({
-            type: 'error',
-            message: '删除失败'
-          })
         })
+        const index = this.list.findIndex((x) => {
+          return x.id === row.id
+        })
+        this.list.splice(index, 1)
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -619,7 +509,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        batchUser(this.batchObj).then((resp) => {
+        batchRecord(this.batchObj).then((resp) => {
           this.dialogBatchVisible = false
           this.$message({
             type: 'success',
