@@ -257,7 +257,7 @@ export default {
       this.listFilteredVersion = {}
       this.listFilteredVersionNumber = 0
       this.listQuery.zone = ''
-      this.list = this.listOrgin
+      this.getList()
     },
     handleFilter(item) {
       var listFiltered = []

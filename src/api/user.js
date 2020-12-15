@@ -38,9 +38,9 @@ export function addUser(data) {
   })
 }
 
-export function updateUser(id, data) {
+export function updateUser(data) {
   return request({
-    url: '/api/users/' + id,
+    url: '/api/users',
     method: 'put',
     data
   })
@@ -58,5 +58,20 @@ export function batchUser(data) {
     url: '/api/users/batch',
     method: 'post',
     data
+  })
+}
+
+export function chPassword(data) {
+  return request({
+    url: '/api/users/chpw',
+    method: 'post',
+    data
+  })
+}
+
+export function getSum() {
+  return request({
+    url: '/api/sys/sum',
+    method: 'get'
   })
 }

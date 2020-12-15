@@ -72,44 +72,6 @@ export const constantRoutes = [
   },
 
   {
-    path: '/',
-    component: Layout,
-    redirect: '/domain',
-    name: 'List',
-    meta: { title: 'Domain', icon: 'el-icon-s-help' },
-    children: [
-      {
-        path: 'domain',
-        name: 'Table',
-        component: () => import('@/views/domain/index'),
-        meta: { title: 'Domain', icon: 'example', affix: true }
-      }
-      // {
-      //   path: 'record/:recordid',
-      //   name: 'Record',
-      //   hidden: true,
-      //   component: () => import('@/views/record/index'),
-      //   meta: { key: 'path', title: 'Record', icon: 'user' }
-      // }
-    ]
-  },
-
-  {
-    path: '/record',
-    component: Layout,
-    redirect: '/record/:recordid',
-    hidden: true,
-    children: [
-      {
-        path: '/:recordid',
-        component: () => import('@/views/record/index'),
-        name: 'Record',
-        meta: { key: 'path', title: 'Record', icon: 'user', noCache: true }
-      }
-    ]
-  },
-
-  {
     path: '/profile',
     component: Layout,
     redirect: '/profile/index',
@@ -130,6 +92,48 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
+  {
+    path: '/',
+    component: Layout,
+    redirect: '/dashboard',
+    children: [
+      {
+        path: 'dashboard',
+        component: () => import('@/views/dashboard/index'),
+        name: 'Dashboard',
+        meta: { title: 'Dashboard', icon: 'dashboard', affix: true, roles: ['admin'] }
+      }
+    ]
+  },
+
+  {
+    path: '/domain',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Domain',
+        component: () => import('@/views/domain/index'),
+        meta: { title: 'Domain', icon: 'example', affix: true, roles: ['admin', 'editor', 'viewer'] }
+      }
+    ]
+  },
+
+  {
+    path: '/record',
+    component: Layout,
+    redirect: '/record/:recordid',
+    hidden: true,
+    children: [
+      {
+        path: '/:recordid',
+        component: () => import('@/views/record/index'),
+        name: 'Record',
+        meta: { key: 'path', title: 'Record', icon: 'user', noCache: true, roles: ['admin', 'editor', 'viewer'] }
+      }
+    ]
+  },
+
   {
     path: '/system',
     component: Layout,

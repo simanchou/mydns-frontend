@@ -21,7 +21,7 @@
       </el-button>-->
     </div>
 
-    <el-button v-if="selected.length" type="primary" size="mini" @click="handleBatchOperation">批量操作</el-button><!--disabled值动态显示，默认为true,当选中复选框后值为false-->
+    <el-button v-if="selected.length" type="primary" size="mini" @click="handleBatchOperation">Batch Action</el-button><!--disabled值动态显示，默认为true,当选中复选框后值为false-->
     <el-table
       ref="multipleTable"
       :key="tableKey"
@@ -58,7 +58,7 @@
       </el-table-column>
       <el-table-column class-name="status-col" label="Status" align="center">
         <template slot-scope="{row}">
-          <el-tag :type="row.active | statusFilter">{{ row.active?'启用':'禁用' }}</el-tag>
+          <el-tag :type="row.active | statusFilter">{{ row.active?'active':'inactive' }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column align="center" prop="created_at" label="Create_time">
@@ -73,7 +73,7 @@
       </el-table-column>
       <el-table-column label="Actions" align="center" class-name="small-padding fixed-width">
         <template slot-scope="{row,$index}">
-          <el-button type="primary" size="mini" @click="handleUpdate(row)">
+          <el-button v-if="row.username!='admin'" type="primary" size="mini" @click="handleUpdate(row)">
             Edit
           </el-button>
           <el-button v-if="row.username!='admin'" size="mini" type="danger" @click="handleDelete(row,$index)">
@@ -152,9 +152,9 @@
       </div>
     </el-dialog>
 
-    <el-dialog :visible.sync="dialogBatchVisible" title="批量操作" width="25%">
+    <el-dialog :visible.sync="dialogBatchVisible" title="Batch Action" width="25%">
       <el-form ref="batchDataForm" :rules="rules" :model="batchObj" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="操作类型" prop="actionType">
+        <el-form-item label="Action Type" prop="actionType">
           <el-select v-model="batchObj.action" class="filter-item" placeholder="Please select">
             <el-option v-for="item in actionTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
           </el-select>
@@ -195,9 +195,9 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
 }, {})
 
 const roleTypeOptions = [
-  { key: 'admin', display_name: '管理员' },
-  { key: 'editor', display_name: '编辑者' },
-  { key: 'viewer', display_name: '观察者' }
+  { key: 'admin', display_name: 'admin' },
+  { key: 'editor', display_name: 'editor' },
+  { key: 'viewer', display_name: 'viewer' }
 ]
 
 const roleTypeKeyValue = roleTypeOptions.reduce((acc, cur) => {
@@ -206,8 +206,8 @@ const roleTypeKeyValue = roleTypeOptions.reduce((acc, cur) => {
 }, {})
 
 const activeTypeOptions = [
-  { key: true, display_name: '启用' },
-  { key: false, display_name: '禁用' }
+  { key: true, display_name: 'active' },
+  { key: false, display_name: 'inactive' }
 ]
 
 const activeTypeKeyValue = activeTypeOptions.reduce((acc, cur) => {
@@ -216,9 +216,9 @@ const activeTypeKeyValue = activeTypeOptions.reduce((acc, cur) => {
 }, {})
 
 const actionTypeOptions = [
-  { key: 'active', display_name: '启用' },
-  { key: 'inactive', display_name: '禁用' },
-  { key: 'delete', display_name: '删除' }
+  { key: 'active', display_name: 'active' },
+  { key: 'inactive', display_name: 'inactive' },
+  { key: 'delete', display_name: 'delete' }
 ]
 
 const actionTypeKeyValue = actionTypeOptions.reduce((acc, cur) => {
@@ -310,11 +310,11 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        username: [{ required: true, message: 'username is required', trigger: 'change' }],
-        nickname: [{ required: true, message: 'nickname is required', trigger: 'change' }],
-        role: [{ required: true, message: 'role is required', trigger: 'change' }],
-        active: [{ required: true, message: 'active is required', trigger: 'change' }],
-        password: [{ required: true, message: 'password is required', trigger: 'change' }]
+        username: [{ required: true, message: 'username is required', trigger: 'blur' }],
+        nickname: [{ required: true, message: 'nickname is required', trigger: 'blur' }],
+        role: [{ required: true, message: 'role is required', trigger: 'blur' }],
+        active: [{ required: true, message: 'active is required', trigger: 'blur' }],
+        password: [{ required: true, message: 'password is required', trigger: 'blur' }]
       },
       downloadLoading: false
     }
@@ -549,23 +549,42 @@ export default {
         }
       })
     },
+    goToProfile() {
+      this.$confirm('go to Profile if you want to change something for admin user', 'Notice', {
+        confirmButtonText: 'Turn to Profile',
+        cancelButtonText: 'Cancel',
+        type: 'warning'
+      }).then(() => {
+        console.log('begin to turn to profile..........')
+        this.$router.push({ name: 'Profile' })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: 'You choose cancel'
+        })
+      })
+    },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.role = this.temp.roles[0]
-      this.dialogItemInput = true
-      this.temp.password = ''
-      this.dialogItemStatus = 'update'
-      this.dialogEditItemVisible = true
-      this.$nextTick(() => {
-        this.$refs['itemDataForm'].clearValidate()
-      })
+      if (this.temp.username === 'admin') {
+        this.goToProfile()
+      } else {
+        this.temp.role = this.temp.roles[0]
+        this.dialogItemInput = true
+        this.temp.password = ''
+        this.dialogItemStatus = 'update'
+        this.dialogEditItemVisible = true
+        this.$nextTick(() => {
+          this.$refs['itemDataForm'].clearValidate()
+        })
+      }
     },
     updateData() {
       this.$refs['itemDataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateUser(tempData.id, tempData).then(() => {
-            const index = this.list.findIndex(v => v.id === this.temp.id)
+          updateUser(tempData).then(() => {
+            const index = this.list.findIndex(v => v.id === tempData.id)
             this.list.splice(index, 1, this.temp)
             this.dialogEditItemVisible = false
             this.$notify({
@@ -589,27 +608,27 @@ export default {
       this.list.splice(index, 1)
     },
     handleDelete(row, index) {
-      this.$confirm('此操作将永久删除该条目, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+      this.$confirm('This item will be delete, and can not restore.Continue?', 'Warning', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       }).then(() => {
         deleteUser(row.id).then(() => {
           this.$message({
             type: 'success',
-            message: '删除成功!'
+            message: 'Delete Successful!'
           })
           this.list.splice(index, 1)
         }).catch(() => {
           this.$message({
             type: 'error',
-            message: '删除失败'
+            message: 'Delete Fail!'
           })
         })
       }).catch(() => {
         this.$message({
           type: 'info',
-          message: '已取消删除'
+          message: 'You choose cancel'
         })
       })
     },

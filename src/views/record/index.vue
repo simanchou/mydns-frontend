@@ -14,7 +14,7 @@
       </el-button>-->
     </div>
 
-    <el-button v-if="selected.length" type="primary" size="mini" @click="handleBatchOperation">批量操作</el-button><!--disabled值动态显示，默认为true,当选中复选框后值为false-->
+    <el-button v-if="selected.length" type="primary" size="mini" @click="handleBatchOperation">Batch Action</el-button><!--disabled值动态显示，默认为true,当选中复选框后值为false-->
     <el-table
       ref="multipleTable"
       :key="tableKey"
@@ -106,9 +106,9 @@
       </div>
     </el-dialog>
 
-    <el-dialog :visible.sync="dialogBatchVisible" title="批量操作" width="25%">
+    <el-dialog :visible.sync="dialogBatchVisible" title="Batch Action" width="25%">
       <el-form ref="batchDataForm" :rules="rules" :model="batchObj" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="操作类型" prop="actionType">
+        <el-form-item label="Action Type" prop="actionType">
           <el-select v-model="batchObj.action" class="filter-item" placeholder="Please select">
             <el-option v-for="item in actionTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
           </el-select>
@@ -150,8 +150,8 @@ const recordTypeKeyValue = recordTypeOptions.reduce((acc, cur) => {
 }, {})
 
 const activeTypeOptions = [
-  { key: true, display_name: '启用' },
-  { key: false, display_name: '禁用' }
+  { key: true, display_name: 'active' },
+  { key: false, display_name: 'inactive' }
 ]
 
 const activeTypeKeyValue = activeTypeOptions.reduce((acc, cur) => {
@@ -160,9 +160,9 @@ const activeTypeKeyValue = activeTypeOptions.reduce((acc, cur) => {
 }, {})
 
 const actionTypeOptions = [
-  // { key: 'active', display_name: '启用' },
-  // { key: 'inactive', display_name: '禁用' },
-  { key: 'delete', display_name: '删除' }
+  // { key: 'active', display_name: 'active' },
+  // { key: 'inactive', display_name: 'inactive' },
+  { key: 'delete', display_name: 'delete' }
 ]
 
 const actionTypeKeyValue = actionTypeOptions.reduce((acc, cur) => {
@@ -377,7 +377,7 @@ export default {
       this.listFilteredVersionNumber = 0
       this.listQuery.value = ''
       this.listQuery.name = ''
-      this.list = this.listOrgin
+      this.getList()
     },
     getRowKey(row) {
       return row.id
