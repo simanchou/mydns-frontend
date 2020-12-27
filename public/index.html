@@ -9,6 +9,12 @@
     <title><%= webpackConfig.name %></title>
   </head>
   <body>
+    <script>
+      var master="__MASTER__"
+      if (master !== "") {
+        window.location.replace("http://" + master);
+      }
+    </script>
     <div id="app"></div>
     <!-- built files will be auto injected -->
   </body>

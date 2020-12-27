@@ -1,17 +1,10 @@
 .:53 {
-  #hosts {
-  #  192.168.2.97 ns1.mydns.local
-  #  192.168.2.98 ns2.mydns.local
-  #  # ttl
-  #  ttl 60
-  #  reload 1m
-  #  fallthrough
-  #}
-  lkvs {
-    db_file /mydns/dns.db
-    api_port 5500
-    #master 192.168.1.100:5500
-    slave 192.168.1.2,192.168.1.133
+  hosts {
+    127.0.0.1 ns1.mydns.local
+    127.0.0.2 ns2.mydns.local
+    ttl 60
+    reload 1m
+    fallthrough
   }
 
   forward . /etc/resolv.conf
